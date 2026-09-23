@@ -1,0 +1,11 @@
+image_path,patient_id,label
+images/p001_01.jpg,p001,NORMAL
+images/p001_02.jpg,p001,NORMAL
+images/p002_01.jpg,p002,PNEUMONIA
+images/p002_02.jpg,p002,PNEUMONIA
+images/p003_01.jpg,p003,NORMAL
+images/p003_02.jpg,p003,NORMAL
+images/p004_01.jpg,p004,PNEUMONIA
+images/p004_02.jpg,p004,PNEUMONIA
+images/p005_01.jpg,p005,NORMAL
+images/p006_01.jpg,p006,PNEUMONIA
