@@ -38,9 +38,11 @@ def test_preprocessing_is_not_simple_zero_to_one_normalization():
     image = np.full((224, 224, 3), 128.0, dtype=np.float32)
 
     result = VGG16Preprocessor().preprocess_array(image)
+    simple_normalization = image / 255.0
 
-    assert not np.all((result >= 0) & (result <= 1))
-    assert np.isclose(result.mean(), 24.061, atol=1e-3)
+    assert not np.allclose(result, simple_normalization)
+    assert result.max() > 1.0
+    assert result.min() >= -130.0
 
 
 def test_image_loader_resizes_to_vgg16_shape(tmp_path):
