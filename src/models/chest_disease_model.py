@@ -49,6 +49,7 @@ class SimpleChestDiseaseModel:
             include_top=False,
         )
 
+        base_model.trainable = False
         for layer in base_model.layers:
             layer.trainable = False
 
