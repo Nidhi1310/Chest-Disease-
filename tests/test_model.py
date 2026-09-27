@@ -55,7 +55,7 @@ def test_model_is_compiled_for_sparse_binary_classification():
 
     assert model.loss == "sparse_categorical_crossentropy"
     assert isinstance(model.optimizer, tf.keras.optimizers.Adam)
-    assert float(model.optimizer.learning_rate.numpy()) == 1e-3
+    assert abs(float(model.optimizer.learning_rate.numpy()) - 1e-3) < 1e-6
 
 
 def test_model_insights_report_parameter_breakdown():
