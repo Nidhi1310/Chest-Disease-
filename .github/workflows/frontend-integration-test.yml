@@ -19,7 +19,7 @@ jobs:
       - name: Verify frontend is live
         run: |
           curl --fail --silent --show-error https://chest-disease-ai.onrender.com/ -o frontend.html
-          grep -q "Chest X-ray" frontend.html
+          grep -q 'id="root"' frontend.html
 
       - name: Verify API health and frontend CORS
         run: |
