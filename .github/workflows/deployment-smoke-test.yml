@@ -13,6 +13,7 @@ permissions:
 jobs:
   smoke-test:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Wait for deployment
         run: |
@@ -24,6 +25,12 @@ jobs:
             sleep 10
           done
           test -s health.json
+
+      - name: Verify root endpoint
+        run: curl --fail --silent --show-error https://chest-disease-classifier-aoc7.onrender.com/ -o root.html && grep -q "Chest Disease Classification API" root.html
+
+      - name: Verify info endpoint
+        run: curl --fail --silent --show-error https://chest-disease-classifier-aoc7.onrender.com/info -o info.json && python -c "import json; d=json.load(open('info.json')); assert d['input_shape']==[224,224,3]; assert d['classes']==['NORMAL','PNEUMONIA']; print('Info check passed.')"
 
       - name: Verify model readiness
         run: |
