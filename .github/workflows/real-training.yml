@@ -42,8 +42,43 @@ jobs:
         run: |
           python -m scripts.train             --train-manifest data/splits/train.csv             --validation-manifest data/splits/validation.csv             --test-manifest data/splits/test.csv             --dataset-root data/public_subset/images             --output-model artifacts/model/chest_disease_vgg16.keras             --report artifacts/day6/medical_evaluation.txt             --metadata-dir artifacts/training             --mlflow-experiment chest_disease_clf             --tracking-uri sqlite:///artifacts/mlflow.db             --epochs 5             --batch-size 16             --seed 42
 
+      - name: Smoke test trained model through API
+        run: |
+          MODEL_PATH=artifacts/model/chest_disease_vgg16.keras python app.py > /tmp/chest_api.log 2>&1 &
+          API_PID=$!
+          trap "kill $API_PID 2>/dev/null || true" EXIT
+          for i in {1..18}; do
+            if curl --fail --silent http://127.0.0.1:5000/health > /tmp/health.json; then
+              break
+            fi
+            sleep 5
+          done
+          cat /tmp/health.json
+          TEST_IMAGE=$(python - <<'PY'
+          import csv
+          from pathlib import Path
+          with open("data/splits/test.csv", newline="", encoding="utf-8") as handle:
+              first = next(csv.DictReader(handle))
+          print(Path("data/public_subset/images") / first["image_path"])
+          PY
+          )
+          curl --fail --silent -X POST -F "image=@${TEST_IMAGE}" http://127.0.0.1:5000/predict
+          echo
+          cat /tmp/chest_api.log
+
       - name: Run full unit test suite
         run: python -m pytest -q
+
+      - name: Publish evaluation summary
+        run: |
+          echo "## Real Dataset Training Results" >> "$GITHUB_STEP_SUMMARY"
+          echo >> "$GITHUB_STEP_SUMMARY"
+          echo "**Dataset:** NIH ChestX-ray14-derived subset" >> "$GITHUB_STEP_SUMMARY"
+          echo >> "$GITHUB_STEP_SUMMARY"
+          echo "### Evaluation report" >> "$GITHUB_STEP_SUMMARY"
+          echo '```text' >> "$GITHUB_STEP_SUMMARY"
+          cat artifacts/day6/medical_evaluation.txt >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload model and evaluation artifacts
         uses: actions/upload-artifact@v4
