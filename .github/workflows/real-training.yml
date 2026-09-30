@@ -25,7 +25,7 @@ jobs:
           python-version: "3.13"
 
       - name: Install project dependencies
-        run: python -m pip install -r requirements.txt
+        run: python -m pip install -r requirements-api.txt
 
       - name: Install dataset client
         run: python -m pip install "datasets>=4,<5"
