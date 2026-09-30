@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: real-training
@@ -79,6 +79,18 @@ jobs:
           echo '```text' >> "$GITHUB_STEP_SUMMARY"
           cat artifacts/day6/medical_evaluation.txt >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Publish model release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view chest-disease-model >/dev/null 2>&1; then
+            gh release upload chest-disease-model artifacts/model/chest_disease_vgg16.keras --clobber
+          else
+            gh release create chest-disease-model artifacts/model/chest_disease_vgg16.keras \
+              --title "Chest Disease Model" \
+              --notes "Reproducible VGG16 baseline model produced by the real-data training workflow."
+          fi
 
       - name: Upload model and evaluation artifacts
         uses: actions/upload-artifact@v4
