@@ -1,0 +1,70 @@
+name: Final Portfolio Smoke Test
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "frontend/**"
+      - "app.py"
+      - "requirements-api.txt"
+      - ".github/workflows/final-portfolio-smoke-test.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Verify frontend
+        run: |
+          curl --fail --silent --show-error https://chest-disease-ai.onrender.com/ -o frontend.html
+          grep -q 'id="root"' frontend.html
+          grep -q '<script' frontend.html
+          echo "Frontend is live."
+
+      - name: Verify API health and CORS
+        run: |
+          curl --fail --silent --show-error             --max-time 60             -H "Origin: https://chest-disease-ai.onrender.com"             -D headers.txt             https://chest-disease-api.onrender.com/health             -o health.json
+          cat health.json
+          echo "--- CORS ---"
+          grep -i "access-control-allow-origin" headers.txt
+          grep -i -q "access-control-allow-origin:" headers.txt
+
+      - name: Verify API contract
+        run: |
+          curl --fail --silent --show-error             https://chest-disease-api.onrender.com/info -o info.json
+          python - <<'PY'
+          import json
+          with open("info.json", encoding="utf-8") as handle:
+              data = json.load(handle)
+          assert data["input_shape"] == [224, 224, 3], data
+          assert data["classes"] == ["NORMAL", "PNEUMONIA"], data
+          print("API contract passed.")
+          PY
+
+      - name: Download public chest X-ray
+        run: |
+          curl --fail --location --silent --show-error             https://upload.wikimedia.org/wikipedia/commons/0/01/Pneumonia_x_ray.jpg             -o test-xray.jpg
+
+      - name: Run live prediction
+        run: |
+          curl --fail --silent --show-error             --max-time 150             -H "Origin: https://chest-disease-ai.onrender.com"             -X POST             -F "image=@test-xray.jpg"             https://chest-disease-api.onrender.com/predict             -o prediction.json
+          cat prediction.json
+
+      - name: Validate prediction
+        run: |
+          python - <<'PY'
+          import json
+          with open("prediction.json", encoding="utf-8") as handle:
+              data = json.load(handle)
+          assert data["prediction"] in {"NORMAL", "PNEUMONIA"}, data
+          assert 0.0 <= float(data["confidence"]) <= 1.0, data
+          assert set(data["probabilities"]) == {"NORMAL", "PNEUMONIA"}, data
+          assert abs(sum(float(v) for v in data["probabilities"].values()) - 1.0) < 1e-5, data
+          assert data["request_id"], data
+          print("Live prediction passed.")
+          PY
