@@ -188,6 +188,12 @@ Chest-Disease-/
 └── MODEL_ARCHITECTURE.md    # Model design and rationale
 ```
 
+## Dataset Provenance
+
+The real-data training workflow uses the public **NIH ChestX-ray14-derived NIHChestXR dataset** published by Chehab Lab on Hugging Face. The dataset provides `patient_id`, `scan_id`, image data, and multi-label disease annotations; the published dataset contains 112,120 images from 30,805 unique patients. The project uses **No Finding** as the NORMAL class and **Pneumonia-positive** studies as the PNEUMONIA class, while retaining the source patient ID for leakage-safe splitting. citeturn304556search0
+
+For reproducibility, `scripts/prepare_public_dataset.py` selects a manageable balanced subset and writes the required `image_path,patient_id,label` mapping. The GitHub Actions workflow then performs the Day 3 patient-level split, trains the Day 4 model, runs Day 6 evaluation, and uploads the resulting model and reports as workflow artifacts.
+
 ## Dataset & Leakage Prevention
 
 The splitter expects records containing:
