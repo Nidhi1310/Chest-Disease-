@@ -88,6 +88,15 @@ The VGG16 backbone is frozen for the baseline experiment. Medical evaluation is 
 
 See [MODEL_ARCHITECTURE.md](MODEL_ARCHITECTURE.md).
 
+## Live Demo
+
+**Frontend:** https://chest-disease-ai.onrender.com  
+**Prediction API:** https://chest-disease-api.onrender.com  
+**API docs:** https://chest-disease-api.onrender.com/docs  
+**Health:** https://chest-disease-api.onrender.com/health
+
+The frontend is connected to the deployed Flask prediction API. The deployment has been verified end-to-end with a live chest X-ray prediction smoke test.
+
 ## Real Training Results
 
 The first successful real-data baseline run was completed through GitHub Actions using 1,000 selected studies and a patient-level split. The resulting held-out test set contains 175 images.
