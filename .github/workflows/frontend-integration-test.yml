@@ -1,0 +1,50 @@
+name: Frontend Integration Test
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["main"]
+    paths:
+      - "frontend/**"
+      - ".github/workflows/frontend-integration-test.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Verify frontend is live
+        run: |
+          curl --fail --silent --show-error https://chest-disease-ai.onrender.com/ -o frontend.html
+          grep -q "Chest X-ray" frontend.html
+
+      - name: Verify API health and frontend CORS
+        run: |
+          curl --fail --silent --show-error             -H "Origin: https://chest-disease-ai.onrender.com"             -D headers.txt             https://chest-disease-api.onrender.com/health             -o health.json
+          cat health.json
+          grep -i -q "access-control-allow-origin: https://chest-disease-ai.onrender.com" headers.txt
+
+      - name: Download public chest X-ray
+        run: |
+          curl --fail --location --silent --show-error             https://upload.wikimedia.org/wikipedia/commons/0/01/Pneumonia_x_ray.jpg             -o test-xray.jpg
+
+      - name: Call prediction API from frontend origin
+        run: |
+          curl --fail --silent --show-error             -H "Origin: https://chest-disease-ai.onrender.com"             -X POST             -F "image=@test-xray.jpg"             https://chest-disease-api.onrender.com/predict             -o prediction.json
+          cat prediction.json
+
+      - name: Validate prediction response
+        run: |
+          python - <<'PY'
+          import json
+          with open("prediction.json", encoding="utf-8") as handle:
+              data = json.load(handle)
+          assert data["prediction"] in {"NORMAL", "PNEUMONIA"}, data
+          assert 0 <= float(data["confidence"]) <= 1, data
+          assert set(data["probabilities"]) == {"NORMAL", "PNEUMONIA"}, data
+          assert data["request_id"], data
+          print("Frontend-to-API integration passed.")
+          PY
