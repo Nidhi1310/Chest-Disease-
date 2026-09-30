@@ -88,6 +88,21 @@ The VGG16 backbone is frozen for the baseline experiment. Medical evaluation is 
 
 See [MODEL_ARCHITECTURE.md](MODEL_ARCHITECTURE.md).
 
+## Real Training Results
+
+The first successful real-data baseline run was completed through GitHub Actions using 1,000 selected studies and a patient-level split. The resulting held-out test set contains 175 images.
+
+| Metric | Test result |
+|---|---:|
+| Accuracy | 55.43% |
+| Macro F1 | 0.5536 |
+| ROC-AUC | 0.6031 |
+| PR-AUC | 0.5476 |
+| Pneumonia sensitivity | 65.22% |
+| Pneumonia specificity | 49.06% |
+
+These are baseline results on this evaluated subset, not clinical validation. Full results and the confusion matrix are documented in [RESULTS.md](RESULTS.md).
+
 ## Medical Evaluation
 
 Day 6 provides a reusable evaluation layer for binary medical classification.
