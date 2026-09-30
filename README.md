@@ -205,7 +205,7 @@ Chest-Disease-/
 ├── examples/                # Example patient mappings
 ├── app.py                   # Flask application entry point
 ├── Dockerfile               # Containerized API serving
-├── requirements.txt         # Python dependencies
+├── requirements-api.txt         # Python dependencies
 ├── DESIGN.md                # Data leakage and design decisions
 ├── PREPROCESSING.md         # Preprocessing contract
 ├── METRICS.md               # Evaluation definitions
@@ -245,7 +245,7 @@ python -m venv .venv
 Windows PowerShell:
 
 ```powershell
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m pip install -r requirements-api.txt
 ```
 
 Run the test suite:
