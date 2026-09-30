@@ -59,7 +59,7 @@ def prepare_subset(
         if labels == [NO_FINDING_LABEL] and counts["NORMAL"] < per_class:
             class_name = "NORMAL"
             label = "NORMAL"
-        elif labels == [PNEUMONIA_LABEL] and counts["PNEUMONIA"] < per_class:
+        elif PNEUMONIA_LABEL in labels and counts["PNEUMONIA"] < per_class:
             class_name = "PNEUMONIA"
             label = "PNEUMONIA"
         else:
