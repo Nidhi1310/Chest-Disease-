@@ -10,6 +10,7 @@ from tempfile import NamedTemporaryFile
 from uuid import uuid4
 
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 
 from src.api.image_validation import validate_image_content
 from src.api.predictor import ChestDiseasePredictor
@@ -23,6 +24,8 @@ predictor = ChestDiseasePredictor(model_path=MODEL_PATH)
 def create_app(test_predictor: ChestDiseasePredictor | None = None) -> Flask:
     """Create the API application, allowing dependency injection for tests."""
     application = Flask(__name__)
+    frontend_url = os.getenv("FRONTEND_URL", "*")
+    CORS(application, resources={r"/*": {"origins": frontend_url}})
     active_predictor = test_predictor or predictor
 
     @application.get("/")
