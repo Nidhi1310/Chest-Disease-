@@ -1,14 +1,6 @@
 name: Real Dataset Training
 
 on:
-  push:
-    branches: ["main"]
-    paths:
-      - "scripts/**"
-      - "src/**"
-      - "tests/**"
-      - "requirements.txt"
-      - ".github/workflows/real-training.yml"
   workflow_dispatch:
 
 permissions:
