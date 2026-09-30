@@ -15,3 +15,8 @@ See DESIGN.md, PREPROCESSING.md, and METRICS.md.
 The repository now includes a leakage-safe patient-level splitter at `src/split_strategy/patient_level_split.py`, unit tests under `tests/`, an example patient mapping under `examples/`, and a GitHub Actions test workflow.
 
 The splitter produces train/validation/test CSVs and a data integrity report while validating that no patient appears in more than one split.
+## Day 5 implementation
+
+The project now includes real MLflow experiment tracking under `src/training/`, including explicit parameter logging, per-epoch metric logging, model artifact logging, reproducibility metadata, and programmatic run comparison.
+
+Day 5 does not fabricate model performance. Actual training results are recorded only when the model is trained on the real dataset.
