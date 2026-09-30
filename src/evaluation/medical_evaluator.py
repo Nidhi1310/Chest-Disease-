@@ -163,13 +163,6 @@ class MedicalEvaluator:
             "weighted_f1": weighted_f1,
         }
 
-    @staticmethod
-    def _confusion_matrix(pred_labels: np.ndarray) -> np.ndarray:
-        matrix = np.zeros((2, 2), dtype=int)
-        for true_label, pred_label in zip(pred_labels * 0 + 0, pred_labels):
-            del true_label, pred_label
-        return matrix
-
     def _confusion_matrix(self, pred_labels: np.ndarray) -> np.ndarray:
         matrix = np.zeros((2, 2), dtype=int)
         for true_label, pred_label in zip(self.test_labels, pred_labels):
