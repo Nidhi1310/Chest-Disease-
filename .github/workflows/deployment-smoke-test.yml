@@ -1,0 +1,65 @@
+name: Deployment Smoke Test
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - ".github/workflows/deployment-smoke-test.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for deployment
+        run: |
+          for i in {1..24}; do
+            if curl --fail --silent --show-error https://chest-disease-classifier-aoc7.onrender.com/health -o health.json; then
+              cat health.json
+              break
+            fi
+            sleep 10
+          done
+          test -s health.json
+
+      - name: Verify model readiness
+        run: |
+          python - <<'PY'
+          import json
+          with open('health.json', encoding='utf-8') as f:
+              data = json.load(f)
+          assert data.get('status') == 'healthy', data
+          assert data.get('model_loaded') is True, data
+          assert data.get('output_classes') == ['NORMAL', 'PNEUMONIA'], data
+          print('Health check passed.')
+          PY
+
+      - name: Download public chest X-ray test image
+        run: curl --fail --location --silent --show-error https://upload.wikimedia.org/wikipedia/commons/0/01/Pneumonia_x_ray.jpg -o test-xray.jpg
+
+      - name: Call prediction API
+        run: |
+          curl --fail --silent --show-error \
+            -X POST \
+            -F "image=@test-xray.jpg" \
+            https://chest-disease-classifier-aoc7.onrender.com/predict \
+            -o prediction.json
+          cat prediction.json
+
+      - name: Verify prediction response
+        run: |
+          python - <<'PY'
+          import json
+          with open('prediction.json', encoding='utf-8') as f:
+              data = json.load(f)
+          assert data['prediction'] in {'NORMAL', 'PNEUMONIA'}, data
+          assert 0.0 <= float(data['confidence']) <= 1.0, data
+          probabilities = data['probabilities']
+          assert set(probabilities) == {'NORMAL', 'PNEUMONIA'}, data
+          assert abs(sum(float(v) for v in probabilities.values()) - 1.0) < 1e-5, data
+          assert data.get('request_id'), data
+          print('Prediction API smoke test passed.')
+          PY
