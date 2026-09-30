@@ -1,0 +1,67 @@
+name: Real Dataset Training
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "scripts/**"
+      - "src/**"
+      - "tests/**"
+      - "requirements.txt"
+      - ".github/workflows/real-training.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: real-training
+  cancel-in-progress: true
+
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install project dependencies
+        run: python -m pip install -r requirements.txt
+
+      - name: Install dataset client
+        run: python -m pip install "datasets>=4,<5"
+
+      - name: Prepare public NIH ChestX-ray14 subset
+        run: |
+          python -m scripts.prepare_public_dataset             --output-dir data/public_subset/images             --mapping data/public_subset/patient_mapping.csv             --per-class 500
+
+      - name: Create leakage-safe patient-level splits
+        run: |
+          python -m src.data_pipeline.data_splitter             --mapping data/public_subset/patient_mapping.csv             --dataset-root data/public_subset/images             --output-dir data/splits             --report artifacts/day3/data_integrity_report.txt             --seed 42
+
+      - name: Train and evaluate
+        run: |
+          python -m scripts.train             --train-manifest data/splits/train.csv             --validation-manifest data/splits/validation.csv             --test-manifest data/splits/test.csv             --dataset-root data/public_subset/images             --output-model artifacts/model/chest_disease_vgg16.keras             --report artifacts/day6/medical_evaluation.txt             --metadata-dir artifacts/training             --mlflow-experiment chest_disease_clf             --tracking-uri sqlite:///artifacts/mlflow.db             --epochs 5             --batch-size 16             --seed 42
+
+      - name: Run full unit test suite
+        run: python -m pytest -q
+
+      - name: Upload model and evaluation artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: chest-disease-real-training
+          path: |
+            artifacts/model/
+            artifacts/day3/
+            artifacts/day6/
+            artifacts/training/
+            artifacts/mlflow.db
+          if-no-files-found: error
+          retention-days: 30
