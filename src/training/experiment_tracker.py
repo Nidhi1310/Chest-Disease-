@@ -89,14 +89,12 @@ class ExperimentTracker:
 
         if isinstance(config, dict):
             params = dict(config)
-        elif hasattr(config, "__dict__"):
-            params = dict(vars(config))
         else:
-            params = {
-                name: getattr(config, name)
-                for name in dir(config)
+            names = [
+                name for name in dir(config)
                 if not name.startswith("_") and not callable(getattr(config, name))
-            }
+            ]
+            params = {name: getattr(config, name) for name in names}
 
         params.setdefault("model", "VGG16")
         params.setdefault("optimizer", "Adam")
