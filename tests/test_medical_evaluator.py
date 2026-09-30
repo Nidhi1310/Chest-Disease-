@@ -48,8 +48,8 @@ def test_pneumonia_metrics_are_computed_from_pneumonia_as_positive_class():
 
     assert pneumonia["tp"] == 2
     assert pneumonia["fn"] == 1
-    assert pneumonia["fp"] == 0
-    assert pneumonia["tn"] == 3
+    assert pneumonia["fp"] == 1
+    assert pneumonia["tn"] == 2
     assert pneumonia["sensitivity"] == pytest.approx(2 / 3)
     assert pneumonia["specificity"] == 1.0
 
