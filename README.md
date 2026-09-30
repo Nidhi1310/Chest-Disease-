@@ -118,6 +118,30 @@ The training layer uses **MLflow** to record:
 
 The repository intentionally does **not** fabricate training results. Actual metrics are recorded only after training on the real dataset.
 
+## Reproducible Training
+
+The repository includes a real-dataset training entry point at `scripts/train.py`. It consumes the validated Day 3 train/validation/test manifests and re-checks patient/image separation before calling `model.fit()`.
+
+Expected manifest columns:
+
+```text
+image_path,patient_id,label
+```
+
+Example:
+
+```bash
+python -m scripts.train \\
+  --train-manifest data/splits/train.csv \\
+  --validation-manifest data/splits/validation.csv \\
+  --test-manifest data/splits/test.csv \\
+  --dataset-root /path/to/dataset
+```
+
+The run trains the frozen VGG16 baseline, records the experiment in MLflow, saves the Keras model, and generates the Day 6 medical evaluation report.
+
+No patient identifiers are inferred from filenames, and no performance values are claimed until this command is run against the real dataset.
+
 ## Prediction API
 
 The Day 7 Flask API exposes:
