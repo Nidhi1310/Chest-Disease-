@@ -71,9 +71,8 @@ def test_save_training_metadata_writes_valid_json(tmp_path):
 
 
 def test_real_mlflow_run_can_log_params_and_metrics(tmp_path, monkeypatch):
-    tracking_uri = tmp_path.as_uri()
+    tracking_uri = f"sqlite:///{tmp_path / "mlflow.db"}"
     previous_uri = mlflow.get_tracking_uri()
-    monkeypatch.setenv("MLFLOW_ALLOW_FILE_STORE", "true")
     try:
         tracker = ExperimentTracker(
             experiment_name="day5-test",
