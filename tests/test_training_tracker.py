@@ -71,7 +71,7 @@ def test_save_training_metadata_writes_valid_json(tmp_path):
 
 
 def test_real_mlflow_run_can_log_params_and_metrics(tmp_path, monkeypatch):
-    tracking_uri = f"sqlite:///{tmp_path / "mlflow.db"}"
+    tracking_uri = "sqlite:///" + str(tmp_path / "mlflow.db")
     previous_uri = mlflow.get_tracking_uri()
     try:
         tracker = ExperimentTracker(
