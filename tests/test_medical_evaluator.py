@@ -51,7 +51,7 @@ def test_pneumonia_metrics_are_computed_from_pneumonia_as_positive_class():
     assert pneumonia["fp"] == 1
     assert pneumonia["tn"] == 2
     assert pneumonia["sensitivity"] == pytest.approx(2 / 3)
-    assert pneumonia["specificity"] == 1.0
+    assert pneumonia["specificity"] == pytest.approx(2 / 3)
 
 
 def test_confidence_calibration_uses_prediction_confidence_not_pneumonia_probability():
