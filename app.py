@@ -25,6 +25,25 @@ def create_app(test_predictor: ChestDiseasePredictor | None = None) -> Flask:
     application = Flask(__name__)
     active_predictor = test_predictor or predictor
 
+    @application.get("/")
+    def root():
+        """Return a simple public landing page for the deployed API."""
+        return (
+            "<!doctype html><html><head><meta charset='utf-8'>"
+            "<meta name='viewport' content='width=device-width, initial-scale=1'>"
+            "<title>Chest Disease Classification API</title></head>"
+            "<body style='font-family:Arial,sans-serif;max-width:760px;margin:60px auto;padding:0 24px'>"
+            "<h1>Chest Disease Classification API</h1>"
+            "<p>Educational NORMAL vs PNEUMONIA chest X-ray classification service.</p>"
+            "<p><strong>Not a clinical diagnostic system.</strong></p>"
+            "<h2>Endpoints</h2><ul>"
+            "<li><a href='/health'>/health</a> — service/model health</li>"
+            "<li><a href='/info'>/info</a> — model contract</li>"
+            "<li><a href='/docs'>/docs</a> — API documentation</li>"
+            "<li>POST /predict — upload a JPG/PNG image for prediction</li>"
+            "</ul></body></html>"
+        )
+
     @application.get("/health")
     def health():
         """Return API and model readiness information."""
