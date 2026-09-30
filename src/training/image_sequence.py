@@ -27,6 +27,7 @@ class ManifestImageSequence(tf.keras.utils.Sequence):
         seed: int = 42,
         preprocessor: VGG16Preprocessor | None = None,
     ) -> None:
+        super().__init__()
         self.rows = [dict(row) for row in rows]
         self.dataset_root = Path(dataset_root) if dataset_root else None
         self.batch_size = batch_size
